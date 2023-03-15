@@ -1,15 +1,74 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+
+import { createBrowserRouter, LoaderFunction, RouterProvider } from "react-router-dom";
+import Root from "./routes/root";
+import BasicFetch from "./routes/basic";
+import FactorizedHooks from "./routes/withFactorizedHooks";
+import FactorizedHooksRefresh from "./routes/withFactorizedHooksRefresh";
+import ReactQueryWrapper from "./routes/withReactQuery";
+import SimpleHooks from "./routes/withSimpleHooks";
+import RouterData from "./routes/withRouter";
+import { Post } from "./types";
+
+const loadData: LoaderFunction = async ({ request, params }) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // fake delay
+  const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${params.postId}`, { signal: request.signal});
+  const post = (await response.json()) as Post;
+  const userResponse = await fetch(
+    `https://jsonplaceholder.typicode.com/users/${post.userId}`, { signal: request.signal}
+  );
+  const user = await userResponse.json();
+  return { user, post };
+};
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    children: [
+      {
+        index: true,
+        element: <App />,
+      },
+      {
+        path: "/basic",
+        element: <BasicFetch />,
+      },
+      {
+        path: "/simple-hooks",
+        element: <SimpleHooks />,
+      },
+      {
+        path: "/factorized-hooks",
+        element: <FactorizedHooks />,
+      },
+      {
+        path: "/factorized-hooks-refresh",
+        element: <FactorizedHooksRefresh />,
+      },
+      {
+        path: "/react-query",
+        element: <ReactQueryWrapper />,
+      },
+      {
+        path: "/router/:postId",
+        element: <RouterData />,
+        loader: loadData,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
