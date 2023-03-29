@@ -1,21 +1,5 @@
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
-import { Post, User } from "../types";
-
-const fetchPost = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // fake delay
-  const response = await fetch("https://jsonplaceholder.typicode.com/posts/1");
-  return (await response.json()) as Post;
-};
-
-const fetchUser = async (userId?: number) => {
-  if(!userId) return;
-
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // fake delay
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/users/${userId}`
-  );
-  return (await response.json()) as User;
-};
+import { fetchPost, fetchUser } from "../lib/rawFetch";
 
 const queryClient = new QueryClient();
 
@@ -28,13 +12,13 @@ export default function ReactQueryWrapper() {
 }
 
 function ReactQueryDemo() {
-  const { isLoading: isLoadingPost, data: post } = useQuery<Post, Error>(
+  const { isLoading: isLoadingPost, data: post } = useQuery(
     ["post", 1],
-    fetchPost
+    () => fetchPost(1)
   );
   const { isLoading: isLoadingUser, data: user } = useQuery(
     ["user", post?.userId],
-    () => fetchUser(post?.userId),
+    () => post?.userId ? fetchUser(post?.userId) : undefined,
     { enabled: Boolean(post?.userId) }
   );
 

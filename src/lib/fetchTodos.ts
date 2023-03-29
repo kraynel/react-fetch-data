@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Todo } from "../types";
+import { fetchTodos } from "./rawFetch";
 
 export const useTodos = () => {
   const [data, setData] = useState<Todo[]>([]);
@@ -8,11 +9,7 @@ export const useTodos = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // fake delay
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/users/1/todos"
-        );
-        const json = (await response.json()) as Todo[];
+        const json = await fetchTodos();
         setData(json);
       } finally {
         setIsLoading(false);

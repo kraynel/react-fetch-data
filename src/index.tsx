@@ -12,16 +12,11 @@ import FactorizedHooksRefresh from "./routes/withFactorizedHooksRefresh";
 import ReactQueryWrapper from "./routes/withReactQuery";
 import SimpleHooks from "./routes/withSimpleHooks";
 import RouterData from "./routes/withRouter";
-import { Post } from "./types";
+import { fetchPost, fetchUser } from "./lib/rawFetch";
 
 const loadData: LoaderFunction = async ({ request, params }) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // fake delay
-  const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${params.postId}`, { signal: request.signal});
-  const post = (await response.json()) as Post;
-  const userResponse = await fetch(
-    `https://jsonplaceholder.typicode.com/users/${post.userId}`, { signal: request.signal}
-  );
-  const user = await userResponse.json();
+  const post = await fetchPost(Number(params.postId), { signal: request.signal});
+  const user = await fetchUser(Number(post.userId), { signal: request.signal});
   return { user, post };
 };
 
